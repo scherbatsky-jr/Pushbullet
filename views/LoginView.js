@@ -1,20 +1,25 @@
 import React, {useState} from 'react';
 import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
 
-const LoginView = () => {
+const LoginView = ({navigation}) => {
   const [accessToken, setAccessToken] = useState('');
   const [userInfo, setUserInfo] = useState({});
 
   const fetchData = () => {
-    console.log('reached her');
     fetch('https://api.pushbullet.com/v2/users/me', {
       method: 'GET',
-      header: {
+      headers: {
         'Access-Token': accessToken,
       },
-    }).then(response => {
-      setUserInfo(response);
-    });
+    })
+      .then(response => response.json())
+      .then(json => {
+        setUserInfo(json);
+        navigation.navigate('Inbox', {accessToken: accessToken});
+      })
+      .catch(error => {
+        console.log(error);
+      });
   };
 
   return (
@@ -26,7 +31,6 @@ const LoginView = () => {
         onChangeText={newText => setAccessToken(newText)}
       />
       <Button title="Enter" onPress={fetchData} />
-      {userInfo ? <Text>{userInfo.name}</Text> : null}
     </View>
   );
 };
